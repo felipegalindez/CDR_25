@@ -1,0 +1,111 @@
+---
+title: "Clase_25Mar"
+output: html_document
+---
+
+```{r}
+setwd("C:/Users/silic/OneDrive/Escritorio/R Felipe/CDR_25/CDR_25")
+getwd()
+```
+
+```{r}
+#cargo la libreria
+library(tidyverse)
+```
+
+```{r}
+#cargo el dataset
+barrios<-read.csv("dataset barrios.csv")
+
+```
+
+```{r}
+#grafico el dataset
+ggplot(barrios)+geom_histogram(aes(x=INGRESO),
+                                 fill='skyblue',
+                                 color='blue')
+```
+
+```{r}
+#uso de la funcion de dplyr
+
+summarise(barrios, ingreso_prom=mean(INGRESO))
+summarise(barrios, ingreso_mediana=median(INGRESO))
+
+#ó se pueden calcular las dos juntas
+summarise(barrios, ingreso_prom=mean(INGRESO),
+          ingreso_mediana=median(INGRESO)
+          )
+
+#agrupo los datos del dataset (por la var. cluster)
+barrios_agrupados<-group_by(barrios,cluster)
+barrios_agrupados
+#uso la misma funcion de dplyr pero ahora sobre el dataset agrupado
+summarise(barrios_agrupados,
+          ingreso_prom=mean(INGRESO),
+          ingreso_mediana=median(INGRESO)
+          )
+```
+
+```{r}
+#ejecuto lo mismo usando pipes
+    #no necesito transformar mi dataset
+
+barrios |> 
+  group_by(cluster) |> 
+  summarise(ingreso_prom=mean(INGRESO),
+            ingreso_mediana=median(INGRESO)
+            )
+```
+
+```{r}
+#uso mas funciones de dplyr (medidas de dispersion)
+
+barrios |> 
+  group_by(cluster) |> 
+  summarise(ingreso_var=var(INGRESO),
+            ingreso_desvio=sd(INGRESO),
+            ingreso_cv=ingreso_desvio/mean(INGRESO),
+            ingreso_rango=max(INGRESO)-min(INGRESO),
+            ingreso_IQR=IQR(INGRESO),
+            ingreso_IQR_2=
+              quantile(INGRESO,0.75)-quantile(INGRESO,0.25)
+          )
+
+#Calculo de las medidas de dispersion
+
+  #var = S^2 = sumatoria ( yi - mean(y) )^2
+  #sd = S = sqrt(S^2)
+  #rango intercuartilico = IQR = Q3 - Q1
+  #cv = sd / mean
+  #rango = max - min}
+
+```
+
+```{r}
+#una medida es ROBUSTA si no es alterada por valores atipicos
+```
+
+```{r}
+#cargo un nuevo dataset
+dogs<-read.csv("Dogs_of_Cambridge.csv")
+```
+
+```{r}
+# Manipulación útil a la que vamos a volver más adelante
+ dogs_top5 <- 
+   dogs |> 
+   mutate(Breed = case_when(
+     Dog_Breed == "Mixed Breed" ~ "Mixed",
+     Dog_Breed != "Mixed Breed" ~ "Single")) |> 
+   filter(Dog_Name %in% c("Luna", "Charlie", "Lucy", "Cooper", "Rosie" ))
+
+count(dogs_top5, Dog_Name)
+#ó usando pipes
+dogs_top5|>count(Dog_Name)
+
+#grafico
+ggplot(data=dogs_top5,
+       mapping=aes(x=Dog_Name))+
+         geom_bar()
+```
