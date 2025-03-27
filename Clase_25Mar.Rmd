@@ -109,3 +109,71 @@ ggplot(data=dogs_top5,
        mapping=aes(x=Dog_Name))+
          geom_bar()
 ```
+
+```{r}
+#Clase 27/03/25
+
+#resumen del nuevo dataset
+dogs_top5 |> glimpse()
+
+#tabla de frecuencias
+count(dogs_top5,Dog_Name, sort=TRUE)
+
+#grafico las frecuencias
+ggplot(data=dogs_top5,
+       mapping=aes(x=Dog_Name)) +
+  geom_bar()
+
+#mismo grafico sin el mapping
+ggplot(data=dogs_top5,
+       aes(x=Dog_Name)) +
+  geom_bar()
+#mismo grafico usando pipes
+dogs_top5 |> ggplot(aes(x=Dog_Name))+geom_bar()
+
+
+
+```
+
+```{r}
+#grafico columnas
+
+dog_counts<-count(dogs_top5, Dog_Name)
+dog_counts
+#grafico col ordenando las columnas
+ggplot(data=dog_counts,
+       mapping= aes(x=fct_infreq(Dog_Name,n),
+                                  y=n)) +
+  geom_col()
+#grafico col ordenando las col segun una medida de resumen
+#en este caso uso la media
+ggplot(data=dog_counts,
+       mapping= aes(x=fct_reorder(Dog_Name,n, .fun=mean),
+                                  y=n)) +
+  geom_col()
+```
+
+```{r}
+#grafico segun Dog_Name y Breed
+
+count(dogs_top5, Dog_Name, Breed)
+dogs_top5 |> count(Dog_Name, Breed) |> spread(Breed, n)
+
+#grafico de barras con frecuencia absoluta agrupado (Dog_Name, Breed)
+ggplot(data= dogs_top5,
+       mapping=aes(x=Dog_Name, fill=Breed)) +
+  geom_bar(position = "dodge")
+#grafico de barras con frecuencia relativa (Breed) agrupado (Dog_Name)
+ggplot(data= dogs_top5,
+       mapping=aes(x=Dog_Name, fill=Breed)) +
+  geom_bar(position = "fill")
+
+#proporciones condicionales (Dog_Name) formato tabla aprupado (Breed) 
+#ordenado por la var. prop desc
+dogs_top5 |> 
+  count(Dog_Name, Breed) |> 
+  group_by(Breed) |> 
+  mutate(prop=n/sum(n)*100) |> 
+  arrange(Breed, -prop)
+
+```

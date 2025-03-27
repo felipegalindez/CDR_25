@@ -1,0 +1,83 @@
+---
+title: "Actividad_1"
+output: html_document
+---
+
+ 
+
+```{r}
+#install.packages("readxl")
+```
+
+```{r}
+library(tidyverse)
+
+library(readxl)
+```
+
+ 
+
+```{r}
+df<-read_xlsx("dataset actividad I.xlsx")
+
+#readxl::read_xlsx(dataset.xlsx) carga la funcion sin cargar la libreria
+```
+
+```{r}
+glimpse(df)
+```
+
+```{r}
+df<-
+  df |> 
+  mutate(grupo=as.factor(grupo))
+
+glimpse(df)
+```
+
+```{r}
+df |> 
+  summarise(media_var1=mean(var_1),
+            media_var2=mean(var_2),
+            mediana_var1=median(var_1),
+            mediana_var2=median(var_2),
+            sd_var1=sd(var_1),
+            sd_var2=sd(var_2),
+            correlacion=cor(var_1,var_2)
+            )
+```
+
+```{r}
+graf_1<-
+  df |> 
+  ggplot()+
+  geom_point(aes(x=var_1, y=var_2),
+             color="green",
+             size=2.5,
+             alpha=0.5)
+
+graf_1
+```
+
+```{r}
+df<- 
+  df |> 
+  rename(G=grupo)
+```
+
+```{r}
+df |> 
+  group_by(G) |> 
+              summarise(mn_v1=mean(var_1),
+                        mn_var2=mean(var_2),
+                        median_var1=median(var_1),
+                        median_var2=median(var_2),
+                        sd_v1=sd(var_1),
+                        sd_var2=sd(var_2),
+                        cor=cor(var_1,var_2)
+                        )
+
+df |> 
+  ggplot() + 
+  geom_point(aes())
+```
