@@ -3,12 +3,6 @@ title: "Actividad_1"
 output: html_document
 ---
 
- 
-
-```{r}
-#install.packages("readxl")
-```
-
 ```{r}
 library(tidyverse)
 
@@ -66,6 +60,10 @@ df<-
 ```
 
 ```{r}
+df |> glimpse() |> |> |> |> |> 
+```
+
+```{r}
 df |> 
   group_by(G) |> 
               summarise(mn_v1=mean(var_1),
@@ -77,7 +75,39 @@ df |>
                         cor=cor(var_1,var_2)
                         )
 
-df |> 
-  ggplot() + 
-  geom_point(aes())
+```
+
+```{r}
+graf_2 <-
+      df |> 
+        ggplot() +
+        geom_point(aes(x=var_1, y=var_2, color=G),
+                   alpha=0.7) + theme_bw()
+
+graf_2
+```
+
+```{r}
+graf_3 <-
+      df |> 
+        ggplot() +
+        geom_point(aes(x=var_1, y=var_2),
+                   color='green',
+                   alpha=0.7) + facet_wrap(~G) + theme_bw()
+
+graf_3
+```
+
+```{r}
+graf_4 <-
+      df |> 
+        ggplot() +
+        geom_point(aes(x=var_1, y=var_2),
+                   color='darkgreen',
+                   alpha=0.7) +
+                      geom_smooth(aes(x=var_1, y=var_2), se=FALSE, color='green') +
+                        facet_wrap(~G) + 
+                          theme_bw()
+
+graf_4
 ```
