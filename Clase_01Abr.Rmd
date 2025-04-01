@@ -1,0 +1,149 @@
+---
+title: "Clase_01Abr"
+output: html_document
+---
+
+```{r}
+#Librerias
+library(tidyverse)
+```
+
+```{r}
+#Leo y cargo el dataset
+df<-
+  read.csv("dataset_barrios_con_na.csv")
+```
+
+```{r}
+#Resumen del dataset
+df |> glimpse()
+```
+
+```{r}
+#Filtro el dataset (AND)
+df |> 
+  filter(cluster!='A',INGRESO>100000)
+```
+
+```{r}
+#Que se cumplan las tres condiciones (AND)
+df |> filter(cluster!='A',INGRESO>100000, barrio==7)
+```
+
+```{r}
+#Que se cumpla alguna de las dos condiciones (OR)
+df |> 
+  filter(cluster!='A' | INGRESO>100000)
+```
+
+```{r}
+#Otra seleccion cluster = A ó B (IN)
+df |> 
+  filter(cluster %in% c('A','B')) |> 
+  count(cluster)
+```
+
+```{r}
+#calculo indicadores segmentados por cluster
+df |> 
+  group_by(cluster) |> 
+  summarise(ingreso_prom=mean(INGRESO),
+            empleo_prom=mean(EMPLEO),
+            educacion_prom=mean(EDUCACION),
+            cant=n())
+```
+
+```{r}
+#Excluyo a TODOS los NA
+df |> 
+  na.omit() |> 
+  group_by(cluster) |> 
+  summarise(ingreso_prom=mean(INGRESO),
+            empleo_prom=mean(EMPLEO),
+            educacion_prom=mean(EDUCACION),
+            cant=n())
+```
+
+```{r}
+#Excluyo SOLO los que tienen NA en esas variables 
+df |> 
+  drop_na(INGRESO, EMPLEO, EDUCACION) |> 
+  group_by(cluster) |> 
+  summarise(ingreso_prom=mean(INGRESO),
+            empleo_prom=mean(EMPLEO),
+            educacion_prom=mean(EDUCACION),
+            cant=n())
+```
+
+```{r}
+#Excluyo SOLO los que tienen NA en esas variables
+df |> 
+  group_by(cluster) |> 
+  summarise(ingreso_prom=mean(INGRESO, na.rm=TRUE),
+            empleo_prom=mean(EMPLEO, na.rm=TRUE),
+            educacion_prom=mean(EDUCACION, na.rm=TRUE))
+```
+
+```{r}
+#convertir los NA a la media por grupo al que pertenece
+df2<-
+  df |> 
+  group_by(cluster) |> 
+  mutate(INGRESO=
+           if_else(is.na(INGRESO)==TRUE, mean(INGRESO, na.rm=TRUE), INGRESO),
+         EMPLEO=
+           if_else(is.na(EMPLEO)==TRUE, mean(EMPLEO, na.rm = TRUE), EMPLEO),
+         EDUCACION=
+           if_else(is.na(EDUCACION)==TRUE, mean(EDUCACION, na.rm=TRUE), EDUCACION)
+         ) |> 
+  ungroup()
+```
+
+```{r}
+#imprimo el dataset corregido}
+df
+```
+
+```{r}
+#transformo la variable cluster
+df3<-
+  df2 |>
+  mutate(cluster=
+           case_when(cluster=='A'~'MEDIO',
+                     cluster=='B'~'ALTO',
+                     cluster=='C'~'BAJO' 
+                     )
+         )
+df |> count(cluster)
+```
+
+```{r}
+#creo una variable con tramo_ingreso
+df4 <-
+  df3 |> 
+  mutate(tramo_ingreso=
+           case_when(INGRESO<100000~'BAJO',
+                     INGRESO>=100000 & INGRESO<=150000~'MEDIO',
+                     INGRESO>150000~'ALTO')
+         )
+df4|> count(tramo_ingreso)
+  
+```
+
+```{r}
+#grafico usando geom_bar
+df4 |>
+  ggplot()+
+  geom_bar(aes(x=tramo_ingreso),
+           fill='green',
+           color='black')
+```
+
+```{r}
+#grafico usando geom_col
+  df4 |> count(tramo_ingreso)  |>
+    
+    ggplot()+geom_col(aes(x=fct_reorder(tramo_ingreso, -n), y=n),
+                      fill='darkgreen',
+                      color='black')
+```
