@@ -1,0 +1,113 @@
+---
+title: "Clase08_04_25"
+format: html
+---
+
+```{r}
+library(tidyverse)
+
+```
+
+```{r}
+#install.packages("ggplot2movies")
+```
+
+```{r}
+library(ggplot2movies)
+```
+
+```{r}
+data(movies)
+```
+
+```{r}
+bd <- movies
+glimpse(bd)
+```
+
+```{r}
+#ej 1, pt 1
+bd |> nrow()
+```
+
+```{r}
+#ej 1 pt 2
+top5_year<-
+  bd |> 
+  group_by(year) |> 
+  count() |> 
+  arrange(desc(n)) |> 
+  head(5)
+
+top5_year
+```
+
+```{r}
+bd |> 
+  ggplot() +
+  geom_histogram(aes(x=rating),
+                 color="black",
+                 fill="green")
+```
+
+```{r}
+bd |>
+  slice_max(votes, n=10)
+```
+
+```{r}
+bd_2 <- bd |> 
+  transmute(titulo=title,
+            año=year,
+            duracion_en_horas=length/60,
+            votos_en_millones=votes/1e6)
+```
+
+```{r}
+bd |> 
+  filter(year>2000 | votes > 10000) |> 
+  ggplot()+
+  geom_point(aes(x=length, y=rating),
+              color="darkgreen",
+             alpha=0.5
+              )
+```
+
+```{r}
+bd<-
+  bd |> mutate(decada=floor(year/10)*10)
+```
+
+```{r}
+  bd |> 
+  group_by(decada) |> 
+  summarise(rating_prom_decada=round(mean(rating),digits=2)) |> 
+    print()
+```
+
+```{r}
+muestra<-
+  bd |> 
+  filter(year>2000) |> 
+  slice_sample(n=20)
+
+muestra
+```
+
+```{r}
+bd<- bd |> 
+  mutate(n_generos= rowSums(across(c(Action, Animation, Comedy, Drama, Documentary, Romance, Short))))
+
+
+```
+
+```{r}
+bd |> select(title, n_generos, Action, Animation, Comedy, Drama, Documentary, Romance, Short)
+```
+
+```{r}
+bd |> drop_na(mpaa) |> 
+ggplot()+
+  geom_bar(aes(x=rating))
+           , fill=mpaa
+```
