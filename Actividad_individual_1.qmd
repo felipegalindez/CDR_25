@@ -1,0 +1,67 @@
+---
+title: "Actividad_individual_1"
+format: html
+---
+
+```{r}
+#install.packages("gapminder")
+library(tidyverse)
+library(dplyr)
+library(gapminder)
+data(gapminder)
+glimpse(gapminder)
+```
+
+```{r}
+#1.1
+# Filtrar los países del continente asiático en el año 2007 con esperanza de vida mayor a 70 y PBI per cápita mayor a 5000
+bd_filtrada <- 
+  gapminder |> 
+filter(continent=="Asia"| year==2007 | lifeExp > 70 | gdpPercap > 5000)
+
+mediana <- bd_filtrada |> summarise(median(gdpPercap))
+mediana
+```
+
+```{r}
+#1.2
+#crear una nueva variable que represente el ingreso total (gdpPercap * pop) y visualizar la densidad del logaritmo de la variable creada
+
+densidad_ingreso_total_log <-
+  gapminder |> 
+  mutate(ingreso_total = gdpPercap * pop) |> 
+  ggplot() +
+  geom_density(aes(x=log(ingreso_total)))
+print(densidad_ingreso_total_log)
+  
+
+```
+
+```{r}
+#1.3
+#crear un nuevo data frame con las variables densidad_ingreso_total_log y luego country , year y una variable categórica de esperanza de vida (baja <menos de 50 años>, media <entre 50 y menos de 70 años>, alta <70 años o más>). Luego, realizar la tabla de frecuencias de la variable categórica y la visualización de dicha tabla
+
+
+freq_exp_country_year <-
+  gapminder |> 
+  select(country, year, lifeExp) |>    
+  mutate(
+    esp_de_vida = case_when(
+      lifeExp < 50 ~ "baja",
+      lifeExp >= 50 & lifeExp < 70 ~ "media",
+      lifeExp >= 70 ~ "alta"
+      )
+    ) |> 
+    group_by(esp_de_vida) |> 
+    summarise(frecuencia = n())
+  
+freq_exp_country_year
+  
+freq_exp_country_year |> 
+  ggplot() +
+  geom_col(aes(x=esp_de_vida, y = frecuencia, fill = esp_de_vida))
+```
+
+```{r}
+#1.4
+```
