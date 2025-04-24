@@ -106,8 +106,72 @@ bd |> select(title, n_generos, Action, Animation, Comedy, Drama, Documentary, Ro
 ```
 
 ```{r}
-bd |> drop_na(mpaa) |> 
+bd |>  
 ggplot()+
-  geom_bar(aes(x=rating))
-           , fill=mpaa
+  geom_density(aes(x=rating
+           , fill= mpaa
+           , alpha = 0.5))
+```
+
+```{r}
+bd |> 
+  ggplot() +
+  geom_density(aes(x=rating
+                   ,alpha=0.5
+                   , color = "green")) +
+  facet_wrap(vars(decada))
+  
+```
+
+```{r}
+pelis_por_año <-
+  bd |> 
+    group_by(year) |> 
+   summarise(cantidad = n())
+  
+pelis_por_año |>   
+  ggplot() +
+  geom_line(aes(x=year, y= cantidad)
+            , color="black"
+            )
+```
+
+```{r}
+bd |> 
+  
+  ggplot() +
+  geom_point(aes(x=votes ,y=rating
+                 , color=n_generos)
+             )
+```
+
+```{r}
+bd |> 
+  select(starts_with("A"), ends_with("ion"), contains("rat"))
+```
+
+```{r}
+extra<-read.csv("peliculas_info_extra.csv")
+extra |> 
+  as_data_frame()
+```
+
+```{r}
+join <-
+left_join(bd, extra, join_by(title == title))
+```
+
+```{r}
+join |> 
+  group_by(director) |> 
+  summarise(promedio_por_director = mean(rating))
+
+```
+
+```{r}
+join |> 
+  ggplot() +
+  geom_bar(aes(x=nominaciones_oscar),
+           color="black",
+           fill="blue")
 ```
