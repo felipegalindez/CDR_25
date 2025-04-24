@@ -1,0 +1,79 @@
+---
+title: "pinguinos"
+format: html
+---
+
+```{r}
+install.packages("palmerpenguins")
+```
+
+```{r}
+library(palmerpenguins)
+library(tidyverse)
+data(penguins)
+glimpse(penguins)
+```
+
+```{r}
+ ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+ geom_point(size = 3) +
+ labs(title = "Masa corporal vs. largo de aleta", color = "Especie")
+```
+
+```{r}
+install.packages("viridis")
+library(viridis)
+ ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+ geom_point(size = 3) +
+ labs(title = "Masa corporal vs. largo de aleta", color = "Especie") +
+ scale_color_viridis(discrete = TRUE, option = "D")
+ 
+```
+
+```{r}
+ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g, color = bill_length_mm)) +
+ geom_point(size = 3) +
+ scale_color_viridis(option = "C") +
+ labs(title = "Color como longitud del pico")
+```
+
+ 
+
+```{r}
+ ggplot(penguins, aes(x = species, fill = island)) +
+ geom_bar(position = "dodge") +
+ labs(title = "Cantidad de pingüinos por especie e isla", x = "Especie", y = "Cantidad") +
+ theme_minimal() +
+ theme(
+ plot.title = element_text(face = "bold", hjust = 0.5),
+ legend.position = "bottom"
+  )
+```
+
+```{r}
+install.packages("ggmosaic")
+library(ggmosaic)
+ ggplot(data = penguins) +
+ geom_mosaic(aes(x = product(species, island), fill = species)) +
+ labs(title = "Relación entre especie e isla", x = "", y = "")
+```
+
+```{r}
+install.packages("GGally")
+library(GGally)
+ ggscatmat(penguins, 
+columns = c("bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"),
+ color = "species")
+```
+
+```{r}
+ggpairs(
+ data = penguins,
+ columns = c("bill_length_mm", "flipper_length_mm", "body_mass_g"),
+ aes(color = species)
+ )
+```
+
+```{r}
+ ggpairs(penguins, columns = c(1,2,3,4))
+```
