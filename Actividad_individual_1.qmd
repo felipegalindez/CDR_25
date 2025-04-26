@@ -64,4 +64,195 @@ freq_exp_country_year |>
 
 ```{r}
 #1.4
+#Usar mutate(across()) para categorizar todas las variables numéricas en tres niveles: bajo, medio y alto. 
+gapminder_cat<-
+gapminder |> 
+  mutate(across(where(~is.numeric(.) & !is.integer(.)), 
+                ~ case_when(ntile(., 3) == 1 ~ "bajo",
+                            ntile(., 3) == 2 ~ "medio",
+                            ntile(., 3) == 3 ~ "alto")
+                ,.names = "{.col}_cat"
+                  ))
+gapminder_cat |> 
+  select(contains("_cat")) |> 
+  pivot_longer(cols = everything(), names_to = "col", values_to = "filas") |> 
+  group_by(col, filas) |> 
+  summarise(freq = n(), .groups = "drop")
+  
+  
+```
+
+```{r}
+#1.5
+gapminder_cat<-
+  gapminder_cat |> 
+  mutate(cat_pop = case_when(pop < 1000000 ~ "< 1 millón",
+                             pop >= 1000000 & pop <= 10000000
+                             ~ "1-10  millones",
+                             pop > 10000000 ~ "> 10 millones"))
+glimpse(gapminder_cat$cat_pop)
+```
+
+```{r}
+#1.6
+gapminder_c <-
+  gapminder_cat |> 
+  select(contains("c"))
+colnames(gapminder_c)
+```
+
+```{r}
+#1.7
+summary_exp_continet_decade<-
+  gapminder |> 
+  mutate(decada=round(year/10)*10) |> 
+  group_by(continent, decada) |> 
+  summarise(across(
+                  c(lifeExp, gdpPercap), 
+                  ~mean(.),
+                  .names="media_{.col}")
+            ,
+            across(
+                  c(lifeExp, gdpPercap), 
+                  ~sd(.),
+                  .names="desvio_{.col}")
+            ,
+            .groups="drop")
+
+summary_exp_continet_decade |> 
+  select(continent, decada, contains("media") | contains("desvio"))
+```
+
+```{r}
+#1.8
+mean_2007<-
+gapminder |> 
+  filter(year==2007) |> 
+  summarise(media_gral=mean(gdpPercap))
+
+top10_2007<-
+gapminder |> 
+  filter(year==2007) |> 
+  arrange(desc(lifeExp)) |> 
+  slice(1:10) |> 
+  select(country, lifeExp) 
+
+mean_top10_2007<-
+gapminder |> 
+  filter(year==2007) |> 
+  arrange(desc(lifeExp)) |> 
+  slice(1:10) |> 
+  summarise(media_top10=mean(gdpPercap))
+
+summary_top10_exp<-
+  bind_cols(mean_top10_2007, mean_2007) 
+
+top10_2007
+summary_top10_exp
+
+#la media del gdpPercap de los paises con mayor lifeExp en 2007 es muy superior a la de todos los paises en ese año, por lo tanto se puede decir que con un mayor gdpPercap se vive más.
+
+```
+
+```{r}
+#1.9
+region_labels <- tibble(
+ continent = c("Africa", "Americas", "Asia", "Europe","Oceania"),
+ region = c("África", "Américas", "Asia", "Europa", "Oceanía"))
+
+gapminder_join<-
+  left_join(gapminder,region_labels, by = "continent")
+
+gapminder_join |> 
+  distinct(country, continent, region)
+```
+
+```{r}
+#1.10
+gapminder_pop_first<-
+  gapminder |> 
+  relocate(pop, .before= everything())
+
+gapminder_pop_first
+```
+
+```{r}
+#1.11
+sample10_gapminder<-
+  gapminder |> 
+  sample_frac(0.1)
+
+media_muestra<-
+sample10_gapminder |> 
+  group_by(continent) |> 
+  summarise(media_muestra = mean(lifeExp))
+
+media_gral<-
+gapminder |> 
+  group_by(continent) |> 
+  summarise(media_gral = mean(lifeExp))
+
+
+left_join(media_muestra, media_gral, by = "continent") |> 
+  pivot_longer(
+    cols = starts_with("media"), 
+    names_to = "tipo_media", 
+    values_to = "valor_media"
+  ) |> 
+
+ggplot(aes(x = continent, y = valor_media, fill = tipo_media)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Continente", y = "Valor de la Media", fill = "Tipo de Media") +
+  theme_minimal()
+
+#La media de la esperanza de vida de la muestra y del dataset es muy similar, esto quiere decir que la muestra representa bien al dataset (por lo menos evaluando esat variable). Las diferencias existentes se deben a que al seleccionar a algunos de los registros por más que la selección haya sido aleatoria, sin quererlo estamos "condicionando" el resultado. Por ejemplo en la muestra se deben haber seleccionado países de oceanía con una lifeExp alta por eso la media_muestra es mayor a la media_gral.
+
+```
+
+```{r}
+#1.12
+summary_gdpPercap_lifeExp<-
+gapminder |> 
+  filter(year==2007) |> 
+  mutate(across(gdpPercap, 
+                ~ case_when(ntile(., 3) == 1 ~ "bajo",
+                            ntile(., 3) == 2 ~ "medio",
+                            ntile(., 3) == 3 ~ "alto")
+                ,.names = "gdpPercap_cat"
+                  )) |> 
+  group_by(continent,gdpPercap_cat) |> 
+  summarise(media_lifeExp = mean(lifeExp), .groups="drop")
+
+summary_gdpPercap_lifeExp
+```
+
+```{r}
+#1.13
+estandarizacion<-
+  gapminder |> 
+  mutate(lifeExp = (lifeExp - mean(lifeExp)) / sd(lifeExp),
+         gdpPercap = (gdpPercap - mean(gdpPercap)) / sd(gdpPercap),
+         pop = (pop - mean(pop)) / sd(pop)
+  )
+summary_estandarizado<-
+estandarizacion |> 
+  summarise(round(across(c(lifeExp, gdpPercap, pop), mean, .names= "media_{.col}"),2),
+            across(c(lifeExp, gdpPercap, pop), sd, .names= "desvio_{.col}")
+            )
+summary_estandarizado
+```
+
+```{r}
+#1.14
+summary_lifeExp_gdpPercap<-
+gapminder |> 
+  group_by(country) |> 
+  arrange(year) |> 
+  mutate(var = 
+  if_else(lifeExp>lag(lifeExp,1), "Aumento","Igual o menor")) |> 
+  filter(!is.na(var) & year==2007) |> 
+  group_by(var) |> 
+  summarise(media_gdpPercap = mean(gdpPercap), .groups = "drop")
+  
+summary_lifeExp_gdpPercap  
 ```
