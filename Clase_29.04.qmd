@@ -1,0 +1,203 @@
+---
+title: "Clase_29.04"
+format: html
+---
+
+```{r}
+library(tidyverse)
+library(tidymodels)
+library(mlbench)
+library(rpart.plot)
+library(vip)
+
+data(BostonHousing)
+boston <- BostonHousing
+```
+
+```{r}
+set.seed(1234)
+```
+
+```{r}
+boston_split <- initial_split(boston, prop=0.80)
+
+boston_split
+```
+
+```{r}
+#Datos de entrenamiento
+boston_train <- training(boston_split)
+
+#Datos del test
+boston_test <- testing(boston_split)
+```
+
+```{r}
+#Regresión lineal
+
+boston_lm <-
+  linear_reg() |> 
+  set_engine('lm') |> 
+  fit(medv~., data=boston_train)
+
+boston_lm |> tidy()
+```
+
+```{r}
+#Prediccon de la variable y
+resultados_lm_train <-
+  boston_train |> 
+  select(medv) |> 
+  bind_cols(predict(boston_lm, boston_train)) |> 
+  rename(.pred_lm = .pred)
+
+resultados_lm_train |> head()
+```
+
+```{r}
+#Valores reales vs predicciones
+resultados_lm_train |> 
+  ggplot(aes(x=medv, y=.pred_lm)) +
+  geom_point()+
+  theme_bw()
+```
+
+```{r}
+metrics(resultados_lm_train, truth= medv, estimate= .pred_lm)
+
+#rmse = sqrt(error cuadratico medio)
+#rsq =R
+#mae = 
+```
+
+ 
+
+**Arbol de decision y regresion**
+
+Desventajas:
+
+-   alta varianza (los datos atipicos generan arboles muy distintos)
+
+-   tienden a tener sobreajuste si no se los poda o regulariza
+
+Otros modelos:
+
+-   random forest
+
+-   regresion logistica
+
+-   ensembles
+
+Obs:
+
+\*\* tree_depth niveles del arbol
+
+\*\* min_n() evita las hojas con muy pocos datos
+
+\*\* cost_complexity() si la division no mejora el rendimiento del modelo lo poda
+
+```{r}
+boston_tree <-
+  decision_tree() |> 
+  set_engine('rpart') |> 
+  set_mode('regression') |> #regression = var numerica - classification = var discreta
+  fit(medv~., data=boston_train)
+```
+
+```{r}
+rpart.plot(boston_tree$fit, roundint= FALSE)
+```
+
+```{r}
+boston_tree_p <-
+  decision_tree(cost_complexity = 0.001) |> 
+  set_engine('rpart') |> 
+  set_mode('regression') |>
+  fit(medv~., data=boston_train)
+
+rpart.plot(boston_tree_p$fit, roundint=FALSE)
+```
+
+```{r}
+resultados_tree_train <-
+  boston_train |> 
+  select(medv) |> 
+  bind_cols(predict(boston_tree, boston_train)) |> 
+  rename(.pred_tree=.pred)
+
+resultados_tree_train |>  head()
+```
+
+```{r}
+resultados_tree_train |>  
+  ggplot(aes(x=medv,y=.pred_tree))+
+  geom_point()+ 
+  theme_bw()
+```
+
+```{r}
+metrics(resultados_tree_train, truth = medv, estimate = .pred_tree)
+```
+
+```{r}
+resultados_tree_test= boston_test |>  select(medv) |>   
+bind_cols(predict(boston_tree, boston_test)) |>  
+rename(.pred_tree=.pred)
+ resultados_tree_test |> head()
+```
+
+```{r}
+ metrics(resultados_tree_test, truth = medv, estimate = .pred_tree)
+```
+
+**Random Forests o Bosques aleatorios:**
+
+Combina muchos árboles.
+
+Cada árbol ve un conjunto distinto de los datos y de las variables. **Bootstrap.**
+
+```{r}
+set.seed(1234)
+boston_rf <-
+  rand_forest(trees = 1000) |> #defino cuantos arboles quiero
+  set_engine('ranger',importance='impurity') |> 
+  set_mode('regression') |> 
+  fit(medv~., data=boston_train)
+ boston_rf
+```
+
+```{r}
+ boston_rf |>  vip()
+```
+
+```{r}
+ resultados_rf_train <-
+   boston_train |> select(medv) |>   
+   bind_cols(predict(boston_rf, boston_train)) |> 
+   rename(.pred_rf=.pred)
+ 
+ resultados_rf_train |> head()
+```
+
+```{r}
+ resultados_rf_train |>  ggplot(aes(x=medv,y=.pred_rf))+geom_point()+ theme_bw()
+```
+
+```{r}
+ metrics(resultados_rf_train, truth = medv, estimate = .pred_rf)
+```
+
+```{r}
+resultados_rf_test= boston_test %>% select(medv) |>  
+  bind_cols(predict(boston_rf, boston_test)) |> 
+  rename(.pred_rf=.pred)
+ resultados_rf_test %>% head()
+```
+
+```{r}
+ resultados_rf_test |>  ggplot(aes(x=medv,y=.pred_rf))+geom_point()+ theme_bw()
+```
+
+```{r}
+ metrics(resultados_rf_test, truth = medv, estimate = .pred_rf)
+```
