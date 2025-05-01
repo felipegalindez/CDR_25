@@ -8,6 +8,7 @@ format: html
 library(tidyverse)
 library(dplyr)
 library(gapminder)
+library(plotly)
 data(gapminder)
 glimpse(gapminder)
 ```
@@ -255,4 +256,102 @@ gapminder |>
   summarise(media_gdpPercap = mean(gdpPercap), .groups = "drop")
   
 summary_lifeExp_gdpPercap  
+```
+
+```{r}
+#2.1
+gapminder |> 
+  ggplot(aes(x= gdpPercap,y= lifeExp))+
+  geom_point(aes(color=continent), alpha = 0.6, size= 0.5)+
+  labs(title="Relación entre PIB y esperanza de vida",
+       x= "PIB",
+       y="Esperanza de vida")
+
+
+gapminder |> 
+  ggplot(aes(x= gdpPercap,y= lifeExp))+
+  geom_point(aes(color=continent), alpha = 0.6, size = 0.8)+
+  labs(title="Relación entre PIB y esperanza de vida",
+       x= "PIB",
+       y="Esperanza de vida") +
+  facet_wrap(~continent)
+```
+
+Como se puede ver en los gráficos anteriores, el PIB en relación a la esperanza de vida varía sustancialmente por continente.
+
+En los gráficos en los que se visualiza esta relación para cada continente se puede ver claramente esta variación.
+
+América y África son similares, no hay una correlación lineal entre el PBI y la esperanza de vida. Para practicamente todos los registros, el PBI es bajo. La esperanza de vida tiene un recorrido muy amplio y no se habla con la otra variable.
+
+En Asia ocurre algo similar aunque se empieza a ver cierta relación entre las variables. Cuánto mayor es el PBI , mayor es la esperanza de vida. A su vez vale aclarar que hay algunos valores atípicos.
+
+Al evaluar a Europa si, se puede ver claramente esta relación, hay una clara tendencia de una esperanza de vida más alta cuánto mayor es el PBI.
+
+En Oceanía hay muy pocos registros, todos con una esperanza de vida alta.
+
+```{r}
+#2.2
+gapminder |> 
+  ggplot(aes(x= continent, y=lifeExp))+
+  geom_boxplot()+
+  labs(title="Distribución de la Esperanza de vida",
+       x="Continente",y="Esperanza de vida")
+
+```
+
+En el gráfico de cajas se puede comparar la disribución de la esperanza de vida según el continente.
+
+En los últimos dos continentes (a la derecha) los valores de la lifeExp son altos, más altos que en el resto de los continentes y a su vez son los dos continentes en los cuáles los valores están más concentrados. La diferencia entre ellos es que en Europa hay muchos valores atípicos.
+
+Asia es el contiente en el que el rango intercuartilico es más alto, o sea que los valores están muy dispersos.
+
+África y Ámerica también tienen datos relativamente dispersos y una esperanza de vida más baja, esto se puede apreciar al obsevar la mediana de la lifeExp.
+
+```{r}
+#2.3
+gapminder |> 
+ggplot(aes(x=gdpPercap)) +
+  geom_point(aes(y=lifeExp, color=year), size=0.35, alpha=0.6) +
+  facet_wrap(~year) +
+  labs(title = "PIB en relación a la Esp.vida por año",
+       x = "PIB",
+       y = "Esp. vida") 
+```
+
+```{r}
+#2.4
+graf_interactivo <- 
+  gapminder |> 
+  ggplot(aes(x= gdpPercap,y= lifeExp))+
+  geom_point(aes(color=continent), alpha = 0.6, size= 0.5)+
+  labs(title="Relación entre PIB y esperanza de vida",
+       x= "PIB",
+       y="Esperanza de vida")
+
+graf_interactivo <- ggplotly(scatter_plot)
+
+graf_interactivo
+```
+
+```{r}
+#2.5
+gapminder|> 
+  ggplot(aes(x= gdpPercap, y = lifeExp)) + 
+  geom_violin(aes(fill=continent), alpha= 0.4)+
+  labs(title="Violin",
+       x="PBI",
+       y="Esperanza de vida")
+
+```
+
+```{r}
+#2.6
+gapminder |>  
+  mutate(cat_life = case_when(lifeExp < 50 ~ "baja",
+                               lifeExp >= 50 & lifeExp < 70 ~ "media",
+                               lifeExp >= 70 ~ "alta"))|>
+  ggplot()+
+  geom_mosaic(aes(x=product(continent, cat_life), fill=continent))+
+  labs(title="Gráfico Mosaico",
+       x= "Categoria según Esp. vida")
 ```
