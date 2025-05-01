@@ -4,6 +4,10 @@ format: html
 ---
 
 ```{r}
+echo = FALSE
+```
+
+```{r}
 #install.packages("gapminder")
 library(tidyverse)
 library(dplyr)
@@ -328,7 +332,7 @@ graf_interactivo <-
        x= "PIB",
        y="Esperanza de vida")
 
-graf_interactivo <- ggplotly(scatter_plot)
+graf_interactivo <- ggplotly(graf_interactivo)
 
 graf_interactivo
 ```
