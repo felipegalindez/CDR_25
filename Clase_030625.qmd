@@ -1,0 +1,138 @@
+---
+title: "Sentencias_de_Control_030625"
+format: html
+---
+
+```{r}
+echo = FALSE
+setwd("C:/Users/silic/OneDrive/Escritorio/R Felipe/CDR_25/CDR_25")
+```
+
+```{r}
+library(tidyverse)
+library(purrr)
+library(tibble)
+```
+
+SENTENCIAS DE CONTROL:
+if, else, for, while
+
+SE APLICAN EN:
+lapply, sapply, vapply, mapply
+
+
+COMO SE DECLARAN FUNCIONES:
+```{r}
+mi_funcion <- function(x) {
+  return(x*2)
+}
+mi_funcion(3)
+mi_funcion(c(1,2,3))
+```
+
+IF
+```{r}
+signo_x <- 5
+
+ if (signo_x > 0) {
+ print("x es positivo")
+ } else {
+ print("x es negativo o cero")
+ }
+```
+IFELSE (vectores)
+```{r}
+ vector <- c(1, 2, 3, -1, -2, -3, 0)
+ resultado <- ifelse(vector > 0, "positivo", ifelse(vector < 0, "negativo", "cero"))
+ print(resultado)
+```
+FOR
+```{r}
+x <- c(1, 2, 3, -1, -2, -3)
+
+ resultados <- c()
+ 
+ for (i in seq_along(x)) {
+ if (x[i] > 0) {
+        resultados <- c(resultados, "positivo")
+    } 
+else {
+        resultados <- c(resultados, "negativo")
+    }
+ }
+ print(resultados)
+```
+FOR PARA PARES O IMPARES
+En vez de evaluar x, se evalua el indice "i".
+```{r}
+vector_par_impar <- c(1,2,3,4,5,6,7,8,9,10)
+
+resultados <- c()
+
+for (i in seq_along(vector_par_impar)) {
+  if(i %% 2 == 0) {
+    resultados <- c(resultados, "par")
+  }
+  else {
+    resultados <- c(resultados, "impar")
+  }
+}
+print(paste(vector_par_impar, resultados))
+```
+
+WHILE
+```{r}
+ S <- 0
+ sumando <- Inf
+ tol <- 1e-10
+ i <- 0
+ p <- 1 / 3
+ 
+ while (sumando > tol) {
+    sumando <- p^i
+    S <- S + sumando
+    i <- i + 1
+ }
+ print(paste("Suma =",round(S,1)))
+ print(paste("Veces evaluado :",i))
+ print(paste("Terminos despreciables a partir de:",tol))
+```
+APLICAR FUNCIONES A VECTORES O LISTAS
+
+lapply: aplicado a listas y devuelve listas
+sapply: aplicado a una lista y devuelve un vector
+vapply: igual a sapply pero permite definir el tipo de salida
+mapply: aplicada a multiples argumentos
+
+LAPPLY
+```{r}
+lista <- data.frame(a = 1:5, b = 6:10, c = 11:15)   
+
+lapply(lista, function(f) {
+  return(f+1)
+})
+```
+SAPPLY
+```{r}
+resultado <- sapply(lista, function(f) sum(f))
+resultado
+```
+PURRR
+
+map ~ lapply
+map_dbl, map_int, map_chr devuelve algo del tipo especificado
+map2: se aplica a dos listas
+map_dfr: devuelve un dataframe
+pmap: aplicado a ,ultiples listas y devuelve una lista
+
+```{r}
+ df <- data.frame(a = 1:5, b = 6:10, c = 11:15)
+ res <- map_dbl(df, sum)
+ print(res)
+```
+
+```{r}
+res_df <- map_dfr(df, ~ sum(.x))
+ print(res_df)
+```
+
