@@ -1,0 +1,134 @@
+---
+title: "Shiny_Clase050625"
+format: html
+editor: 
+  markdown: 
+    wrap: sentence
+---
+
+```{r}
+#rm(list())
+echo = FALSE
+```
+
+```{r}
+library(esquisse)
+library(shiny)
+library(tidyverse)
+library(ggplot2)
+```
+
+# SHINY:
+
+#### ui: interfaz de usuario 
+
+#### server: lógica del servidor 
+
+#### shinyApp(): combina ui y server 
+
+#### input: entrada 
+
+#### output: salida
+
+```{r}
+ ui <- fluidPage(
+ titlePanel("Mi primera aplicación Shiny"),
+ sidebarLayout(
+ sidebarPanel(
+ sliderInput("num", "Número:", min = 1, max = 100, value = 50)
+        ),
+ mainPanel(
+ textOutput("result")
+        )
+    )
+ )
+ server <- function(input, output) {
+    output$result <- renderText({
+ paste("El número seleccionado es:", input$num)
+    })
+ }
+ shinyApp(ui = ui, server = server)
+```
+
+```{r}
+ui <- fluidPage(
+ titlePanel("Gráfico interactivo con Shiny"),
+ sidebarLayout(
+ sidebarPanel(
+ sliderInput("num", "Número de bins:", min = 1, max = 100, value = 50)
+        ),
+ mainPanel(
+ plotOutput("plot")
+        )
+    )
+ )
+
+server <- function(input, output) {
+    output$plot <- renderPlot({
+ ggplot(mtcars, aes(x = wt, y = mpg)) +
+ geom_point() +
+ geom_hline(yintercept = input$num, color = "red", linetype = "dashed") +
+ labs(title = paste("Línea horizontal en", input$num))
+    })
+ }
+ # Ahora combinamos la interfaz de usuario y el servidor para crear la aplicación Shiny.
+ shinyApp(ui = ui, server = server)
+```
+
+#### Inputs
+
+textInput(): Campo de texto para ingresar texto.
+
+numericInput(): Campo para ingresar números.
+
+selectInput(): Menú desplegable para seleccionar una opción.
+
+checkboxInput(): Casilla de verificación para seleccionar o deseleccionar una opción.
+
+radioButtons(): Botones de opción para seleccionar una opción entre varias.
+
+sliderInput(): Control deslizante para seleccionar un valor dentro de un rango.
+
+#### Outputs 
+
+textOutput(): Muestra texto en la interfaz de usuario.
+
+plotOutput(): Muestra un gráfico en la interfaz de usuario.
+
+tableOutput(): Muestra una tabla en la interfaz de usuario.
+
+verbatimTextOutput(): Muestra texto sin formato, útil para mostrar código o mensajes de depuración.
+
+#### Funciones render 
+
+renderText(): Renderiza texto en la interfaz de usuario.
+
+renderPlot(): Renderiza un gráfico en la interfaz de usuario.
+
+renderTable(): Renderiza una tabla en la interfaz de usuario.
+
+renderUI(): Renderiza un elemento de interfaz de usuario dinámico.
+
+EJEMPLO:
+
+```{r}
+ui <- fluidPage(
+  titlePanel("Hola"),
+  selectInput(
+    inputId = "selectSpecies",
+    label = "Selecciona una especie del dataset Iris",
+    choices = unique(iris$Species)
+    ), 
+  textOutput(outputId = "outputSpecies")
+)
+
+server <- function(input, output) {
+  output$outputSpecies <- renderText(
+    {
+      paste('Seleccionaste la especie:', input$selectSpecies)
+    }
+  )
+}
+
+shinyApp(ui = ui, server = server)
+```
